@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import PostStats from './PostStats';
 
 type GridPostListProps = {
-  posts:Models.DocumentList<Models.Document>;
+  posts?:Models.DocumentList<Models.Document>;
   showUser?: boolean;
   showStats?: boolean;
 }
@@ -14,7 +14,7 @@ const GridPostList = ({ posts, showUser = true, showStats = true }: GridPostList
   //console.log('posts:', posts);
   return (
     <ul className='grid-container'>
-      {posts.map((post: Models.Document) => {
+      {posts?.documents.map((post: Models.Document) => {
         
         return (
           <li key={post.$id} className='relative min-w-80 h-80'>

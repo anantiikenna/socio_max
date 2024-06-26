@@ -13,7 +13,7 @@ const SearchResults = ({ isSearchFetching, searchedPosts}: SearchResultProps) =>
   if(searchedPosts && searchedPosts.documents.length > 0 ){
    // console.log('result'+searchedPosts.documents)
     return (
-      <GridPostList posts={searchedPosts.documents} />
+      <GridPostList posts={searchedPosts} />
     )
   }
 

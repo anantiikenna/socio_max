@@ -1,7 +1,7 @@
 
 type ImageWH = {
-    width: number | undefined;
-    height: number | undefined;
+    width?: number | undefined;
+    height?: number | undefined;
 }
 
 const Logo = ({width, height}: ImageWH) => {

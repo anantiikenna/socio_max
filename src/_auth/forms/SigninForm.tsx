@@ -17,7 +17,7 @@ import Logo from "@/components/shared/Logo";
 const SigninForm = () => {
 
   const {toast} = useToast();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const { checkAuthUser } = useUserContext();
   const navigate  = useNavigate();
 
   
