@@ -1,35 +1,29 @@
-import {
-  Route,
-  Routes,
-  Link,
-  Outlet,
-  useParams,
-  useLocation,
-} from "react-router-dom";
+import { Route, Routes, Link, Outlet, useParams, useLocation} from "react-router-dom";
 import { useUserContext } from "@/context/AuthContext";
 import Loader from "@/components/shared/Loader";
-import GridPostList from "@/components/shared/GridPostList";
+import GridPostList2 from "@/components/shared/GridPostList2";
 import FollowButton from "@/components/shared/FollowButton";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import FollowStats from "@/components/shared/FollowStats";
 import LikedPosts from "./LikedPosts";
-//import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const Profile = () => {
-  //const [showButton, setShowbutton] = useState(true);
+  const [showButton, setShowbutton] = useState(true);
   const { id } = useParams();
   const { user } = useUserContext();
   const { pathname } = useLocation();
   const { data: currentUser } = useGetUserById(id || "");
+  
+  console.log( currentUser?.posts );
+  console.log( user.id );
 
-/*
   useEffect(() => {
     if (user.id === id) {
     setShowbutton(false);
     }
   }, [showButton, id, user]);
-  */
-
+  
   if (!currentUser)
     return (
       <div className="flex-center w-full h-full">
@@ -58,13 +52,8 @@ const Profile = () => {
               </p>
             </div>
 
-            <FollowStats targetUserId={id}  postlength={currentUser.posts.length} />
-
-            <p className="small-medium md:base-medium text-center xl:text-left mt-7 max-w-screen-sm">
-              {currentUser.bio}
-            </p>
+            <FollowStats targetUserId={currentUser.$id}  postlength={currentUser.posts.length} />
           </div>
-
           <div className="flex justify-center gap-4">
             <div className={`${user.id !== currentUser.$id && "hidden"}`}>
               <Link
@@ -90,6 +79,14 @@ const Profile = () => {
         </div>
       </div>
 
+      {currentUser.bio &&
+        <div className="flex gap-10 : max-xl:justify-center items-center max-w-4xl w-full">
+          <h1 className="text-center xl:text-left h3-bold md:h1-semibold ">Bio</h1>
+            <p className=" text-center xl:text-left overflow-hidden">
+              {currentUser.bio}
+            </p>
+        </div>
+      }
       {currentUser.$id === user.id && (
         <div className="flex max-w-5xl w-full">
           <Link
@@ -124,7 +121,7 @@ const Profile = () => {
       <Routes>
         <Route
           index
-          element={<GridPostList posts={currentUser.posts} showUser={false} />}
+          element={<GridPostList2 posts={currentUser.posts} user={user}/>}
         />
         {currentUser.$id === user.id && (
           <Route path="/liked-posts" element={<LikedPosts />} />

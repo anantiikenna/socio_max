@@ -1,17 +1,18 @@
-import { useUserContext } from '@/context/AuthContext';
 import { Models } from 'appwrite';
 import { Link } from 'react-router-dom';
 import PostStats from './PostStats';
-//import { useState } from 'react';
+import { IUser } from '@/types';
+
 
 type GridPostListProps = {
-  posts?:Models.Document[] | undefined;
+  posts?:Models.Document[];
+  user: IUser;
   showUser?: boolean;
   showStats?: boolean;
 }
 
-const GridPostList = ({ posts, showUser = true, showStats = true }: GridPostListProps)=> {
-  const { user } = useUserContext();
+const GridPostList2 = ({ posts, user, showUser = false, showStats = false }: GridPostListProps)=> {
+  
   //console.log( posts);
   //const [ currentPosts, setCurrentPosts ] = useState([]);
   //const { id } = useParams();
@@ -33,6 +34,7 @@ const GridPostList = ({ posts, showUser = true, showStats = true }: GridPostList
 
             <div className='grid-post_user'>
               {showUser && (
+                
                 <div className='flex items-center justify-start gap-2 flex-1'>
                   <img src={post.creator.imageUrl} alt='creator' className='h-8 w-8 rounded-full' />
                   <p className=' line-clamp-1'>{post.creator.name}</p>
@@ -47,4 +49,4 @@ const GridPostList = ({ posts, showUser = true, showStats = true }: GridPostList
   )
 }
 
-export default GridPostList;
+export default GridPostList2;

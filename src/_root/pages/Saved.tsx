@@ -27,7 +27,7 @@ const Saved = () => {
     )
   }
 
-  const shouldShowPosts = posts.pages.every((item: any) => item.documents.length === 0)
+  const shouldShowPosts = posts.pages.every((item) => item?.documents.length === 0)
   
  
   return (

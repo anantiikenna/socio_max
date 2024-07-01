@@ -4,20 +4,20 @@ import { Link } from 'react-router-dom';
 import PostStats from './PostStats';
 
 type GridPostListProps = {
-  posts:Models.DocumentList<Models.Document>;
+  posts?:Models.Document[];
   showUser?: boolean;
   showStats?: boolean;
 }
 
 const GridSavedPostList = ({ posts, showUser = true, showStats = true }: GridPostListProps)=> {
   const { user } = useUserContext();
-  const filteredPosts = posts.filter((post: Models.Document) => post.save.some((save: Models.Document) => save?.user.$id === user.id));
+  const filteredPosts = posts?.filter((post: Models.Document) => post.save.some((save: Models.Document) => save?.user.$id === user.id));
     console.log(filteredPosts);
   return (
     
     <ul className='grid-container'>
         
-      {filteredPosts.map((post: Models.Document) => {
+      {filteredPosts?.map((post: Models.Document) => {
         
         return (
           <li key={post.$id} className='relative min-w-80 h-80'>
