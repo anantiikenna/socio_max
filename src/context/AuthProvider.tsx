@@ -1,18 +1,19 @@
 import { getCurrentUser } from '@/lib/appwrite/api';
 import { IContextType, IUser } from '@/types';
-import {createContext, useContext, useEffect, useState} from 'react';
+import {createContext, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const INITIAL_USER = {
+const INITIAL_USER: IUser = {
   id:'',
   name: '',
   username:'',
   email: '',
+  imageId: '',
   imageUrl: '',
   bio: '',
 };
 
-const INITIAL_STATE = {
+const INITIAL_STATE: IContextType = {
   user: INITIAL_USER,
   isLoading: false,
   isAuthenticated: false,
@@ -43,6 +44,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           name: currentAccount.name,
           username: currentAccount.username,
           email: currentAccount.email,
+          imageId: currentAccount.imageId,
           imageUrl: currentAccount.imageUrl,
           bio: currentAccount.bio
         });
@@ -88,6 +90,5 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default AuthProvider;
+export {AuthProvider, AuthContext};
 
-export const useUserContext = () => useContext(AuthContext);

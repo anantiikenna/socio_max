@@ -1,5 +1,5 @@
 import { Route, Routes, Link, Outlet, useParams, useLocation} from "react-router-dom";
-import { useUserContext } from "@/context/AuthProvider";
+import { useUserContext } from "@/context/useUserContext";
 import Loader from "@/components/shared/Loader";
 import GridPostList2 from "@/components/shared/GridPostList2";
 import FollowButton from "@/components/shared/FollowButton";

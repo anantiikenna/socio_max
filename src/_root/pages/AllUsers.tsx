@@ -1,5 +1,5 @@
 import GridUserList from '@/components/shared/GridUserList';
-import { useUserContext } from '@/context/AuthProvider';
+import { useUserContext } from "@/context/useUserContext";
 import { useGetUsers } from '@/lib/react-query/queriesAndMutations';
 import { useLocation } from 'react-router-dom';
 

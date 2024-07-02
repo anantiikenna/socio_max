@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import { PostValidation } from "@/lib/validation";
-import { useUserContext } from "@/context/AuthProvider";
+import { useUserContext } from "@/context/useUserContext";
 import { useToast } from "../ui/use-toast";
 import { useCreatePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations";
 
