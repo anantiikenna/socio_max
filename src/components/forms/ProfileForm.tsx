@@ -12,6 +12,7 @@ import FileUploader from "../shared/FileUploader";
 import { useToast } from "../ui/use-toast";
 import { useUpdateUser } from "@/lib/react-query/queriesAndMutations";
 import { EditProfileValidation } from '@/lib/validation';
+import { IUser } from '@/types';
 
 
 
@@ -19,7 +20,7 @@ import { EditProfileValidation } from '@/lib/validation';
 
 
 type PostFormProps = {
-  user?: Models.Document;
+  user?: Models.Document | IUser;
   action: 'Update';
 }
 
