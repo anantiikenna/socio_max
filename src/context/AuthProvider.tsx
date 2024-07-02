@@ -69,7 +69,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     ) navigate('/sign-in')
   
     checkAuthUser();
-  }, []); 
+  }, [navigate]); 
 
   const value = {
      user,

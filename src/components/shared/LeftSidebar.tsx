@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { useEffect } from "react";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/AuthProvider";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
 import Logo from "./Logo";
