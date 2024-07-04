@@ -149,15 +149,25 @@ export const useDeletePost = () => {
 export const useGetPosts = () => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
-    queryFn: getInfinitePosts,
-    getNextPageParam: (lastPage) => { // missing colon here
-      if(lastPage && lastPage.documents.length === 0) return null;
-      const lastId = lastPage.documents[lastPage?.documents.length - 1].$id;
+    queryFn:getInfinitePosts,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.documents.length === 0) return null;
+      const lastDocument = lastPage.documents[lastPage.documents.length - 1];
+      const lastId = lastDocument?.$id;
 
-      return lastId;
-    }
-  })
-}
+      if (!lastId) return null;
+
+      // Convert lastId to a number if it is numeric, otherwise handle the error
+      const numericLastId = parseInt(lastId, 10);
+      if (isNaN(numericLastId)) return null;
+
+      return numericLastId;
+    },
+    initialPageParam: 0, // Initialize with a number
+  });
+};
+
+
 
 export const useSearchPosts = (searchTerm: string) => {
   //const isEnabled = searchTerm.trim().length > 0;
@@ -233,7 +243,6 @@ export const  useGetFollowing = (userId: string) => {
 
 export const  useUpdateUser = () => {
   const queryClient = useQueryClient();
-
   return  useMutation({
     mutationFn: (user: IUpdateUser ) => 
       updateUser(user), 
