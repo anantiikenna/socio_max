@@ -72,7 +72,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     else {
       checkAuthUser();
     }
-  },); 
+  }, []); 
 
   const value = {
      user,
