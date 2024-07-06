@@ -17,7 +17,7 @@ import Logo from "@/components/shared/Logo";
 const SigninForm = () => {
 
   const {toast} = useToast();
-  const { checkAuthUser } = useUserContext();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate  = useNavigate();
 
   
@@ -98,7 +98,7 @@ const SigninForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isSigningIn ? (
+            {isSigningIn || isUserLoading ? (
               <div className=" flex-center gap-2">
                 <Loader /> Loading...
               </div>
