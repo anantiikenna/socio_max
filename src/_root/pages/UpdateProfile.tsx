@@ -1,5 +1,5 @@
 import ProfileForm from "@/components/forms/ProfileForm";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/useUserContext";
 
 const UpdateProfile = () => {
 

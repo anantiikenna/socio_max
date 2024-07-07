@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { useEffect } from "react";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/useUserContext";
 import Logo from "./Logo";
 
 const Topbar = () => {
@@ -12,7 +12,7 @@ const Topbar = () => {
 
     useEffect (() => {
         if( isSuccess ) navigate(0);
-    },[isSuccess])
+    },[isSuccess, navigate])
     
   return (
     <section className="topbar">

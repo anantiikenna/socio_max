@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 import { Models } from "appwrite";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,14 +11,11 @@ import FileUploader from "../shared/FileUploader";
 import { useToast } from "../ui/use-toast";
 import { useUpdateUser } from "@/lib/react-query/queriesAndMutations";
 import { EditProfileValidation } from '@/lib/validation';
-
-
-
-
+import { IUser } from '@/types';
 
 
 type PostFormProps = {
-  user?: Models.Document;
+  user?: Models.Document | IUser;
   action: 'Update';
 }
 

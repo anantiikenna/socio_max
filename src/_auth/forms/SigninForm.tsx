@@ -9,7 +9,7 @@ import Loader from "@/components/shared/Loader";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useSignInAccount } from "@/lib/react-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/useUserContext";
 import Logo from "@/components/shared/Logo";
 
 
@@ -17,7 +17,7 @@ import Logo from "@/components/shared/Logo";
 const SigninForm = () => {
 
   const {toast} = useToast();
-  const { checkAuthUser } = useUserContext();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate  = useNavigate();
 
   
@@ -52,7 +52,10 @@ const SigninForm = () => {
       navigate('/');
       return toast({title:'Welcome! You are now logged in!'});
     } else {
-      return toast({ title: 'Sign up failed. Please try again.' });
+      return toast({ 
+        variant: "destructive",
+        title: 'Sign up failed. Please try again.' 
+      });
     }
   }
 
@@ -95,7 +98,7 @@ const SigninForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isSigningIn ? (
+            {isSigningIn || isUserLoading ? (
               <div className=" flex-center gap-2">
                 <Loader /> Loading...
               </div>

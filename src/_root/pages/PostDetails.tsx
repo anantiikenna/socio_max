@@ -2,7 +2,7 @@ import EditImage from '@/components/shared/EditImage';
 import Loader from '@/components/shared/Loader';
 import PostStats from '@/components/shared/PostStats';
 import { Button } from '@/components/ui/button';
-import { useUserContext } from '@/context/AuthContext';
+import { useUserContext } from "@/context/useUserContext";
 import { useGetPostById } from '@/lib/react-query/queriesAndMutations'
 import { dateFormat } from '@/lib/utils';
 import { Link, useParams } from 'react-router-dom';

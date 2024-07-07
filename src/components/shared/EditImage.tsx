@@ -1,5 +1,4 @@
 
-
 const EditImage = () => {
     return (
         <div className="flex-center w-full">
@@ -14,4 +13,3 @@ const EditImage = () => {
 }
 
 export default EditImage
-
