@@ -34,7 +34,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Check if the current user is authenticated and load it to state
 
   const checkAuthUser = async () => {
-    
+    setIsLoading(true);
     try{
       const currentAccount = await getCurrentUser();
       if(currentAccount){
@@ -64,14 +64,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
  };
 
-  useEffect(() => {
-    if(
-      localStorage.getItem('cookieFallback') === '[]' || 
-      localStorage.getItem('cookieFallback') === null
-    ) navigate('/sign-in')
-    else {
+  useEffect(() => {const cookieFallback = localStorage.getItem("cookieFallback");
+    if (
+      cookieFallback === "[]" ||
+      cookieFallback === null ||
+      cookieFallback === undefined
+    )  navigate('/sign-in')
+    
       checkAuthUser();
-    }
+  
   }, []); 
 
   const value = {
