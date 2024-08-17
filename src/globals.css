@@ -69,7 +69,7 @@
   }
 
   .tiny-medium {
-    @apply text-[10px] font-medium leading-[140%];
+    @apply text-[10px] text- font-medium leading-[140%];
   }
 
   /* UTILITIES */

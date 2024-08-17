@@ -13,14 +13,11 @@ import { useUserContext } from "@/context/useUserContext";
 import Logo from "@/components/shared/Logo";
 
 
-
 const SigninForm = () => {
 
   const {toast} = useToast();
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate  = useNavigate();
-
-  
 
   const { mutateAsync: signInAccount, isPending: isSigningIn }  = useSignInAccount();
 

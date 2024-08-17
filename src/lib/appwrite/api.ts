@@ -96,9 +96,9 @@ export async function getCurrentUser() {
 
 export async function signOutAccount() { 
     try {
-        const session = await account.deleteSession("current");
+      const session = await account.deleteSession("current");
 
-        return session;
+      return session;
         
     } catch (error) {
         console.log(error);
@@ -556,7 +556,6 @@ export async function updatePost(post: IUpdatePost) {
     if(!updatedPost) {
       await deleteFile(post.imageId);
       throw Error;
-  
      }
 /*
     // Failed to update
