@@ -111,6 +111,7 @@ VITE_APPWRITE_STORAGE_ID=
 VITE_APPWRITE_USER_COLLECTION_ID=
 VITE_APPWRITE_POST_COLLECTION_ID=
 VITE_APPWRITE_SAVES_COLLECTION_ID=
+VITE_APPWRITE_RELATIONSHIPS_COLLECTION_ID=
 ```
 
 Replace the placeholder values with your actual Appwrite credentials. You can obtain these credentials by signing up on the [Appwrite website](https://appwrite.io/).
