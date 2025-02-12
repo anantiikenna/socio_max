@@ -11,70 +11,73 @@ type PostCardProps = {
 
 const PostCard = ({ post }: PostCardProps) => {
     const { user } = useUserContext();
+
+    // Prevent crashes if `post` or `post.creator` is missing
+    if (!post || !post.creator) {
+        return <div className="text-light-3">Invalid post data</div>;
+    }
+
     return (
-        
         <div className="post-card">
             <div className="flex-between">
-                <div className=" flex items-center gap-3">
-                    <Link to={`/profile/${post.creator.$id}`}>
+                <div className="flex items-center gap-3">
+                    <Link to={`/profile/${post.creator?.$id ?? ""}`}>
                         <img 
-                            src={post?.creator?.imageUrl || 'assests/icons/profile-plaholder.svg'}
-                            alt={post.creator.name}
+                            src={post.creator?.imageUrl || '/assets/icons/profile-placeholder.svg'}
+                            alt={post.creator?.name || "Unknown User"}
                             className="rounded-full w-12 lg:h-12"
                         />
                     </Link>
 
                     <div className="flex flex-col">
                         <p className="base-medium lg:body-bold text-light-1">
-                            {post.creator.name}
+                            {post.creator?.name || "Unknown"}
                         </p>
                         <div className="flex-center gap-2 text-light-3">
                             <p className="subtle-semibold lg:small-regular">
-                                {dateFormat(post.$createdAt)}
+                                {post.$createdAt ? dateFormat(post.$createdAt) : "Unknown Date"}
                             </p>
                             -
                             <p className="subtle-semibold lg:small-regular">
-                                {post.location}
+                                {post.location || "Unknown Location"}
                             </p>
                         </div>
                     </div>
                 </div>
-                <Link 
-                    to={`/update-post/${post.$id}`}
-                    className={`${user.id !== post.creator.$id && "hidden"}`}
-                >
-                    <img 
-                        src="assets/icons/edit.svg"
-                        alt="edit"
-                        width={20}
-                        height={20}
-                    />
-                </Link>
+                {user?.id === post.creator?.$id && (
+                    <Link to={`/update-post/${post.$id}`}>
+                        <img 
+                            src="/assets/icons/edit.svg"
+                            alt="edit"
+                            width={20}
+                            height={20}
+                        />
+                    </Link>
+                )}
             </div>
+
             <Link to={`/posts/${post.$id}`}>
                 <div className="small-medium lg:base-medium py-5">
-                    <p>{post.caption}</p>
+                    <p>{post.caption || "No caption"}</p>
                     <ul>
-                        {post.tags.map((tag: string) =>{
-                            return (
-                                <li key={tag} className="text-light-3">#{tag}</li>
-                            )
-                        })}
+                        {Array.isArray(post.tags) ? post.tags.map((tag: string) => (
+                            <li key={tag} className="text-light-3">#{tag}</li>
+                        )) : <li className="text-light-3">No tags</li>}
                     </ul>
                 </div>
-                <img 
-                    src={post.imageUrl ||'/assets/icons/profile-placeholder.svg'}
-                    alt="post image"
-                    className="post-card_img    "
-                />
+                {post.imageUrl && (
+                    <img 
+                        src={post.imageUrl}
+                        alt="post image"
+                        className="post-card_img"
+                    />
+                )}
             </Link>
 
-            <PostStats post={post} userId={user.id} />
+            <PostStats post={post} userId={user?.id || ""} />
         </div>
-    )
-  return (
-    <div>PostCard</div>
-  )
-}
+    );
+};
+
 
 export default PostCard;
