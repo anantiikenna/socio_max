@@ -20,3 +20,44 @@ export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 export const avatars = new Avatars(client);
+
+export const createClient = () => {
+  const client = new Client().setEndpoint(appwriteConfig.url!).setProject(appwriteConfig.projectId!);
+
+  return {
+    get account() {
+      return new Account(client);
+    },
+    get databases() {
+      return new Databases(client);
+    },
+    get storage() {
+      return new Storage(client);
+    },
+    get avatars() {
+      return new Avatars(client);
+    },
+  };
+};
+
+export const createSessionClient = async () => {
+  const client = new Client()
+    .setEndpoint(appwriteConfig.url!)
+    .setProject(appwriteConfig.projectId!);
+
+  const account = new Account(client);
+
+  try {
+    // ✅ Fetch the active session from Appwrite
+    const session = await account.getSession('current');
+
+    if (!session) {
+      throw new Error("User session is missing. Please log in again.");
+    }
+
+    return { account };
+  } catch (error) {
+    console.error("Session retrieval failed:", error);
+    throw new Error("User session is missing. Please log in again.");
+  }
+};
