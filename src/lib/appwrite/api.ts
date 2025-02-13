@@ -3,35 +3,35 @@ import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 import { appwriteConfig, avatars, createClient, databases, storage, account } from './config';
 
 export async function createUserAccount(user: INewUser) { 
-    try {
-      const { account } = await createClient();
-        const newAccount = await account.create(
-            ID.unique(),
-            user.email,
-            user.password,
-            user.name
-          
-        );
+  try {
+    
+    const newAccount = await account.create(
+        ID.unique(),
+        user.email,
+        user.password,
+        user.name
+      
+    );
 
-        if(!newAccount) throw Error;
-        //if(!newAccount) throw new Error('Failed' + JSON.stringify(newAccount));
+    if(!newAccount) throw Error;
+    //if(!newAccount) throw new Error('Failed' + JSON.stringify(newAccount));
 
-        const avatarUrl =  avatars.getInitials(user.name);
+    const avatarUrl =  avatars.getInitials(user.name);
 
-        const newUser = await saveUserToDB({
-            accountId: newAccount.$id,
-            name: newAccount.name,
-            email: newAccount.email,
-            username: user.username,
-            imageUrl: avatarUrl,
-        });
+    const newUser = await saveUserToDB({
+        accountId: newAccount.$id,
+        name: newAccount.name,
+        email: newAccount.email,
+        username: user.username,
+        imageUrl: avatarUrl,
+    });
 
-        return newUser;
-        
-    } catch (error) {
-        console.log(error);
-        return error;
-    }
+    return newUser;
+      
+  } catch (error) {
+      console.log(error);
+      return error;
+  }
 }
 
 export async function saveUserToDB(user: {
