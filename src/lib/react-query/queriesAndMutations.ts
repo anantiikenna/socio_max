@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery,} from '@tanstack/react-query';
-import { createPost, createUserAccount, deletePost, deleteSavedPost, followUser, getCurrentUser, getFollowers, getFollowing, getInfinitePosts, getPostById, getRecentPosts, getUserById, getUsers, likePost, savePost, searchPosts, signInAccount, signOutAccount, unfollowUser, updatePost, updateUser } from '../appwrite/api';
+import { createPost, createUserAccount, deletePost, deleteSavedPost, followUser, getCurrentUser, getFollowers, getFollowing, getInfinitePosts, getPostById, getRecentPosts, getSavedPosts, getSavedStatus, getUserById, getUsers, likePost, savePost, searchPosts, signInAccount, signOutAccount, unfollowUser, updatePost, updateUser } from '../appwrite/api';
 import { INewPost, INewUser, IUpdatePost, IUpdateUser } from '@/types';
 import { QUERY_KEYS } from './QUERY_KEYS';
 
@@ -72,6 +72,9 @@ export const useSavePost = () => {
       savePost(postId, userId), 
       onSuccess: () => {
         queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.CHECK_IF_SAVED],
+        })
+        queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.GET_RECENT_POSTS]
         })
         queryClient.invalidateQueries({
@@ -91,6 +94,9 @@ export const useDeleteSavedPost = () => {
     mutationFn: ( savedRecordId: string ) => deleteSavedPost(savedRecordId),
       onSuccess: () => {
         queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.CHECK_IF_SAVED],
+        })
+        queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.GET_RECENT_POSTS]
         })
         queryClient.invalidateQueries({
@@ -102,6 +108,14 @@ export const useDeleteSavedPost = () => {
       }
   })
 }
+
+export const useGetSavedPosts = (userId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_SAVED_POSTS, userId],
+    queryFn: () => getSavedPosts(userId),
+    enabled: !!userId, // Ensures query only runs if userId exists
+  });
+};
 
 export const useGetCurrentUser = () => {
   return useQuery({
@@ -118,6 +132,14 @@ export const useGetPostById = (postId?: string) => {
   })
 }
 
+export const useCheckIfSaved = (userId: string, postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CHECK_IF_SAVED!, userId, postId],
+    queryFn: () => getSavedStatus(userId, postId),
+    enabled: !!userId && !!postId, // Prevents running when data is missing
+  });
+};
+
 export const useUpdatePost = () => {
   const queryClient = useQueryClient();
 
@@ -126,7 +148,7 @@ export const useUpdatePost = () => {
       updatePost(post ), 
       onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id]
+          queryKey: [QUERY_KEYS.GET_POST_BY_ID!, data?.$id]
         })
       }
     

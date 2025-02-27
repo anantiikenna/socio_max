@@ -2,20 +2,14 @@ import { useUserContext } from "@/context/useUserContext";
 import { Models } from 'appwrite';
 import { Link } from 'react-router-dom';
 import PostStats from './PostStats';
+import { GridPostListProps } from "@/types";
 
-type GridPostListProps = {
-  posts?: Models.Document[];
-  showUser?: boolean;
-  showStats?: boolean;
-}
 
 const GridSavedPostList = ({ posts, showUser = true, showStats = true }: GridPostListProps) => {
   const { user } = useUserContext();
 
   // Filter posts that are saved by the current user
-  const filteredPosts = posts?.filter((post: Models.Document) =>
-    Array.isArray(post.save) && post.save.some((save: Models.Document) => save?.user?.$id === user.id)
-  );
+  const filteredPosts = posts;
 
   console.log('Filtered Posts:', filteredPosts);
   console.log('User ID:', user.id);

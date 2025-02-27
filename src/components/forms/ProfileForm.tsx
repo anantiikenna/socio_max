@@ -12,6 +12,7 @@ import { useToast } from "../ui/use-toast";
 import { useUpdateUser } from "@/lib/react-query/queriesAndMutations";
 import { EditProfileValidation } from '@/lib/validation';
 import { IUser } from '@/types';
+import Loader from '../shared/Loader';
 
 
 type PostFormProps = {
@@ -112,7 +113,7 @@ const ProfileForm = ( {  user, action }: PostFormProps ) => {
             <div className="flex gap-4 items-center justify-end">
               <Button type="button" className="shad-button_dark_4">Cancel</Button>
               <Button type="submit"  className="shad-button_primary whitespace-nowrap" disabled={isUpdatingUser}>
-                {isUpdatingUser && 'Loading...'}
+                {isUpdatingUser && <Loader/>}
                 {action} Profile
               </Button>
             </div>

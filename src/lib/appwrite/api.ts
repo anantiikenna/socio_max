@@ -1,4 +1,4 @@
-import { ID, Query, ImageGravity } from 'appwrite';
+import { ID, Query, ImageGravity, Models } from 'appwrite';
 import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 import { appwriteConfig, avatars, createClient, databases, storage, account } from './config';
 
@@ -79,25 +79,32 @@ export async function signInAccount(user: { email: string; password: string }) {
 }
 
 export async function getCurrentUser() {
-    try {
-      
-        const currentAccount = await account.get();
+  try {
+      const currentAccount = await account.get();
+      console.log("Current Account:", currentAccount);
 
-        if(!currentAccount) throw Error;
-    
-        const currentUser = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.userCollectionId,
-            [Query.equal('accountId', currentAccount.$id)]
-        );
-    
-        if(!currentUser) throw Error;
-   
-        return currentUser.documents[0];
-    } catch (error) {
-        console.log(error);
-    }
+      if (!currentAccount) throw new Error("No current account found");
+
+      const response = await databases.listDocuments(
+          appwriteConfig.databaseId,
+          appwriteConfig.userCollectionId,
+          [Query.equal('accountId', currentAccount.$id)]
+      );
+
+      console.log("User Response:", response);
+
+      if (!response || response.documents.length === 0) {
+          console.log("No user document found for this accountId.");
+          return null; // Return null explicitly to avoid undefined errors
+      }
+
+      return response.documents[0];
+  } catch (error) {
+      console.error("Error fetching current user:", error);
+      return null;
+  }
 }
+
 
 export async function signOutAccount() { 
     try {
@@ -386,25 +393,101 @@ export async function likePost(postId: string, likesArray: string[]) {
 }
 
 // ============================== SAVE POST
-export async function savePost(postId: string, userId: string) {
+export async function savePost(postId: string | undefined, userId: string) {
+  if (!postId) {
+    console.error("Error: postId is undefined");
+    return;
+  }
+
   try {
-    const updatedPost = await databases.createDocument(
+    const savedPost = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.savesCollectionId,
       ID.unique(),
       {
-        user: userId,
-        post: postId,
+        user: [userId],  // ✅ Fix: Pass as an array
+        post: [postId],  // ✅ Fix: Pass as an array
       }
     );
 
-    if (!updatedPost) throw Error;
-
-    return updatedPost;
+    console.log("Saved Post Successfully:", savedPost);
+    return savedPost;
   } catch (error) {
-    console.log(error);
+    console.error("Error saving post:", error);  // ✅ More detailed logging
   }
 }
+
+
+export const getSavedStatus = async (userId: string, postId: string) => {
+  try {
+    // Fetch user document
+    const user = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId
+    );
+    console.log("User ID: ", userId);
+
+    // Get the saved post data
+    const savedContent = user?.saves; 
+    const savedId = savedContent?.$id;
+    const savedPostObjects = savedContent?.post || []; // Ensure it's an array
+
+    // Extract only the post IDs
+    const savedPostIds = savedPostObjects.map((post: Models.Document) => post.$id);
+
+    console.log("Save Content: ", savedContent);
+    console.log("Save ID: ", savedId);
+    console.log("Save Post IDs: ", savedPostIds);
+    console.log("Checking if postId exists:", postId);
+    console.log("Response from Appwrite:", savedPostIds.includes(postId));
+
+    // Check if the postId exists in the saved list
+    return savedPostIds.includes(postId);
+  } catch (error) {
+    console.error("Error fetching saved status:", error);
+    return false;
+  }
+};
+
+export const getSavedPosts = async (userId: string) => {
+  try {
+    // Step 1: Fetch user document (includes the `saves` field)
+    const user = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId
+    );
+
+    // Step 2: Extract saved posts from the `saves` relationship
+    const savedContent = user?.saves;
+    if (!savedContent) return [];
+
+    // Step 3: Extract the array of saved post objects
+    const savedPosts = savedContent.post || [];
+
+    console.log("Saved Posts Data:", savedPosts);
+    return savedPosts; // This already contains post details
+  } catch (error) {
+    console.error("Error fetching saved posts:", error);
+    return [];
+  }
+};
+
+export const debugSavesCollection = async () => {
+  try {
+    
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      [Query.limit(200)],
+    );
+    console.log("Saves Collection Data:", response.documents);
+  } catch (error) {
+    console.error("Error fetching Saves Collection:", error);
+  }
+};
+
 // ============================== DELETE SAVED POST
 export async function deleteSavedPost(savedRecordId: string) {
   try {

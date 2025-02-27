@@ -4,6 +4,7 @@ import Topbar from "@/components/shared/Topbar";
 import { useUserContext } from "@/context/useUserContext";
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Loader from "@/components/shared/Loader";
 
 const RootLayout = () => {
   const { isAuthenticated } = useUserContext();
@@ -14,7 +15,7 @@ const RootLayout = () => {
     setTimeout(() => setLoading(false), 500);
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (loading) return <Loader/>;
 
   if (!isAuthenticated) {
     return <Navigate to='/sign-in' replace />;

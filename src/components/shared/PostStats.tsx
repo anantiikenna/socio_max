@@ -1,42 +1,32 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useDeleteSavedPost, useGetCurrentUser, useLikePost, useSavePost } from "@/lib/react-query/queriesAndMutations";
+import React, { useState, useCallback } from "react";
+import { useDeleteSavedPost, useGetCurrentUser, useLikePost, useSavePost, useCheckIfSaved } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
 import { Models } from "appwrite";
 import Loader from "./Loader";
+import { PostStatsProps } from "@/types";
+import { debugSavesCollection } from "@/lib/appwrite/api";
 
-type PostStatsProps = {
-  post?: Models.Document;
-  userId: string;
-};
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
+  const { data: currentUser } = useGetCurrentUser();
   const likesList = post?.likes?.map((user: Models.Document) => user.$id) || [];
-
   const [likes, setLikes] = useState<string[]>(likesList);
-  const [isSaved, setIsSaved] = useState(false);
 
   const { mutate: likePost } = useLikePost();
   const { mutate: savePost, isPending: isSavingPost } = useSavePost();
+  const { data: isSaved, isPending: isCheckingSavedPost } = useCheckIfSaved(currentUser?.$id || "", post?.$id || "");
   const { mutate: deleteSavedPost, isPending: isDeletingSaved } = useDeleteSavedPost();
-  const { data: currentUser } = useGetCurrentUser();
+  
 
-  const savedPostRecord = currentUser?.save?.find(
-    (record: Models.Document) => record.post?.$id === post?.$id
-  );
-
-  useEffect(() => {
-    setIsSaved(!!savedPostRecord);
-  }, [currentUser, savedPostRecord]);
+  // ✅ Replace useEffect with TanStack Query Hook
+ 
 
   const handleLikePost = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-
       setLikes((prevLikes) => {
         const hasLiked = prevLikes.includes(userId);
-        const updatedLikes = hasLiked
-          ? prevLikes.filter((id) => id !== userId)
-          : [...prevLikes, userId];
+        const updatedLikes = hasLiked ? prevLikes.filter((id) => id !== userId) : [...prevLikes, userId];
 
         likePost({ postId: post?.$id || "", likeArray: updatedLikes });
         return updatedLikes;
@@ -49,16 +39,22 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     (e: React.MouseEvent) => {
       e.stopPropagation();
 
-      if (savedPostRecord) {
-        setIsSaved(false);
-        deleteSavedPost(savedPostRecord.$id);
+      if (isSaved ) {
+        deleteSavedPost(currentUser?.saves?.$id);
       } else {
         savePost({ postId: post?.$id || "", userId });
-        setIsSaved(true);
       }
     },
-    [deleteSavedPost, savePost, savedPostRecord, post?.$id, userId]
+    [deleteSavedPost, savePost, isSaved, currentUser?.saves?.$id, post?.$id, userId]
   );
+  // const testDebugT = savePost({postId: "67bb38e600355e7741bd", userId: "67ba01ad0036692bdc22"});
+
+  // console.log("testing listed document:", testDebugT);
+  const testDebug = debugSavesCollection();
+
+  console.log("testing listed document:", testDebug);
+  // console.log("GET currentUser:", currentUser);
+  // console.log("GET currentUser?.saves:", currentUser?.saves);
 
   return (
     <div className="flex justify-between items-center z-20">
@@ -75,7 +71,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
       </div>
 
       <div className="flex gap-2">
-        {isSavingPost || isDeletingSaved ? (
+        {isCheckingSavedPost || isSavingPost || isDeletingSaved ? (
           <Loader />
         ) : (
           <img

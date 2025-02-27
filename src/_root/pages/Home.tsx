@@ -7,9 +7,9 @@ import AllUsers from "./AllUsers";
 const Home = () => {
   const { data: posts, isPending: isPostLoading, error } = useGetRecentPosts();
 
-  console.log("Posts Data:", posts);
-  console.log("Loading:", isPostLoading);
-  console.log("Error:", error);
+  // console.log("Posts Data:", posts);
+  // console.log("Loading:", isPostLoading);
+  // console.log("Error:", error);
 
   // Use optional chaining and fallback values to prevent errors
   const postDocuments: Models.Document[] = posts?.documents || [];
