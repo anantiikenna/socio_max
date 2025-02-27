@@ -405,8 +405,8 @@ export async function savePost(postId: string | undefined, userId: string) {
       appwriteConfig.savesCollectionId,
       ID.unique(),
       {
-        user: [userId],  // ✅ Fix: Pass as an array
-        post: [postId],  // ✅ Fix: Pass as an array
+        users: [userId],  // ✅ Fix: Pass as an array
+        posts: [postId],  // ✅ Fix: Pass as an array
       }
     );
 
@@ -428,27 +428,27 @@ export const getSavedStatus = async (userId: string, postId: string) => {
     );
     console.log("User ID: ", userId);
 
-    // Get the saved post data
-    const savedContent = user?.saves; 
-    const savedId = savedContent?.$id;
-    const savedPostObjects = savedContent?.post || []; // Ensure it's an array
+    // Get all save entries (array of save documents)
+    const savedContents = user?.saves || []; // Ensure it's always an array
+    console.log("Save Content: ", savedContents);
 
-    // Extract only the post IDs
-    const savedPostIds = savedPostObjects.map((post: Models.Document) => post.$id);
+    // Extract all post IDs from each save entry
+    const savedPostIds = savedContents.flatMap((save: Models.Document) => 
+      save.posts?.map((post: Models.Document) => post.$id) || []
+    );
 
-    console.log("Save Content: ", savedContent);
-    console.log("Save ID: ", savedId);
-    console.log("Save Post IDs: ", savedPostIds);
-    console.log("Checking if postId exists:", postId);
-    console.log("Response from Appwrite:", savedPostIds.includes(postId));
+    // console.log("All Saved Post IDs: ", savedPostIds);
+    // console.log("Checking if postId exists:", postId);
+    // console.log("Response from Appwrite:", savedPostIds.includes(postId));
 
-    // Check if the postId exists in the saved list
+    // Check if the postId exists in any of the saved lists
     return savedPostIds.includes(postId);
   } catch (error) {
     console.error("Error fetching saved status:", error);
     return false;
   }
 };
+
 
 export const getSavedPosts = async (userId: string) => {
   try {
@@ -459,15 +459,15 @@ export const getSavedPosts = async (userId: string) => {
       userId
     );
 
-    // Step 2: Extract saved posts from the `saves` relationship
-    const savedContent = user?.saves;
-    if (!savedContent) return [];
+    // Step 2: Ensure user has saves
+    const savedRecords = user?.saves || [];
+    if (!Array.isArray(savedRecords)) return []; // Handle case where saves is not an array
 
-    // Step 3: Extract the array of saved post objects
-    const savedPosts = savedContent.post || [];
+    // Step 3: Extract posts from each saved record
+    const savedPosts = savedRecords.flatMap((save: Models.Document) => save.posts || []);
 
-    console.log("Saved Posts Data:", savedPosts);
-    return savedPosts; // This already contains post details
+    console.log("Fetched Saved Posts:", savedPosts);
+    return savedPosts;
   } catch (error) {
     console.error("Error fetching saved posts:", error);
     return [];
@@ -497,7 +497,7 @@ export async function deleteSavedPost(savedRecordId: string) {
       savedRecordId
     );
 
-    if (!statusCode) throw Error;
+    if (!statusCode) console.log("Error deleting save post");
 
     return { status: "Ok" };
   } catch (error) {

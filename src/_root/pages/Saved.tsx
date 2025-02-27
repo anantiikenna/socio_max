@@ -22,7 +22,7 @@ const Saved = () => {
       </div>
 
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
-        {savedPosts.length === 0 ? (
+        {savedPosts?.length === 0 ? (
           <p className="text-light-4 mt-10 text-center w-full">
             No Saved Posts Available
           </p>

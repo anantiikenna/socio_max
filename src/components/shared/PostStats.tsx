@@ -4,23 +4,20 @@ import { checkIsLiked } from "@/lib/utils";
 import { Models } from "appwrite";
 import Loader from "./Loader";
 import { PostStatsProps } from "@/types";
-import { debugSavesCollection } from "@/lib/appwrite/api";
+// import { debugSavesCollection } from "@/lib/appwrite/api";
 
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
   const { data: currentUser } = useGetCurrentUser();
   const likesList = post?.likes?.map((user: Models.Document) => user.$id) || [];
   const [likes, setLikes] = useState<string[]>(likesList);
-
   const { mutate: likePost } = useLikePost();
   const { mutate: savePost, isPending: isSavingPost } = useSavePost();
   const { data: isSaved, isPending: isCheckingSavedPost } = useCheckIfSaved(currentUser?.$id || "", post?.$id || "");
   const { mutate: deleteSavedPost, isPending: isDeletingSaved } = useDeleteSavedPost();
   
-
   // ✅ Replace useEffect with TanStack Query Hook
  
-
   const handleLikePost = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -38,21 +35,31 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const handleSavePost = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-
-      if (isSaved ) {
-        deleteSavedPost(currentUser?.saves?.$id);
+  
+      if (isSaved) {
+        const savedRecord = currentUser?.saves?.find((save: Models.Document) =>
+          save.posts?.some((savedPost: Models.Document) => savedPost.$id === post?.$id)
+        );
+        const savedRecordId = savedRecord?.$id;
+  
+        if (savedRecordId) {
+          deleteSavedPost(savedRecordId);
+        } else {
+          console.warn("No saved record found for deletion.");
+        }
       } else {
         savePost({ postId: post?.$id || "", userId });
       }
     },
-    [deleteSavedPost, savePost, isSaved, currentUser?.saves?.$id, post?.$id, userId]
+    [deleteSavedPost, savePost, isSaved, currentUser?.saves, post?.$id, userId]
   );
+  
   // const testDebugT = savePost({postId: "67bb38e600355e7741bd", userId: "67ba01ad0036692bdc22"});
 
   // console.log("testing listed document:", testDebugT);
-  const testDebug = debugSavesCollection();
+  // const testDebug = debugSavesCollection();
 
-  console.log("testing listed document:", testDebug);
+  // console.log("testing listed document:", testDebug);
   // console.log("GET currentUser:", currentUser);
   // console.log("GET currentUser?.saves:", currentUser?.saves);
 
