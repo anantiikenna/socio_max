@@ -65,15 +65,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
  };
 
   useEffect(() => {
-    checkAuthUser();
-    const cookieFallback = localStorage.getItem("cookieFallback");
-    if (
-      cookieFallback === "[]" ||
-      cookieFallback === null ||
-      cookieFallback === undefined
-    )  navigate('/sign-in');
-    
-  }, []); 
+    checkAuthUser().then((isAuthenticated) => {
+      // If the current account fetch failed, force them to login.
+      if (!isAuthenticated) navigate('/sign-in');
+    });
+  }, []);
 
   const value = {
      user,

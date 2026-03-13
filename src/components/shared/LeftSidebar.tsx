@@ -6,6 +6,7 @@ import { useUserContext } from "@/context/useUserContext";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
 import Logo from "./Logo";
+import { ThemeToggle } from "../ThemeToggle";
 
 
 const LeftSidebar = () => {
@@ -61,6 +62,9 @@ const LeftSidebar = () => {
             )
           })}
         </ul>
+        <div className="mt-4">
+          <ThemeToggle />
+        </div>
       </div>
       <Button variant='ghost' className="shad-button_ghost items-center" onClick={() => signOut()}>
         <img src="/assets/icons/logout.svg" alt="logout" />

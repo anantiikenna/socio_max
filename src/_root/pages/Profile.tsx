@@ -1,7 +1,7 @@
 import { Route, Routes, Link, Outlet, useParams, useLocation} from "react-router-dom";
 import { useUserContext } from "@/context/useUserContext";
 import Loader from "@/components/shared/Loader";
-import GridPostList2 from "@/components/shared/GridPostList2";
+import GridPostList from "@/components/shared/GridPostList";
 import FollowButton from "@/components/shared/FollowButton";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import FollowStats from "@/components/shared/FollowStats";
@@ -121,7 +121,7 @@ const Profile = () => {
       <Routes>
         <Route
           index
-          element={<GridPostList2 posts={currentUser.posts} user={user}/>}
+          element={<GridPostList posts={currentUser.posts} showUser={false} showStats={true} />}
         />
         {currentUser.$id === user.id && (
           <Route path="/liked-posts" element={<LikedPosts />} />
