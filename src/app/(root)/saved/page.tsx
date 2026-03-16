@@ -12,7 +12,7 @@ export default async function SavedPage() {
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
 
-  const posts = saves?.map((s: { post: Post }) => s.post).filter(Boolean) ?? []
+  const posts = saves?.map((s: any) => Array.isArray(s.post) ? s.post[0] : s.post).filter(Boolean) as Post[] ?? []
 
   return (
     <div className="feed-layout">
