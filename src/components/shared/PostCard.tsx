@@ -4,8 +4,12 @@ import Image from 'next/image'
 import { useState } from 'react'
 import type { Post } from '@/types'
 import { likePost, unlikePost, savePost, unsavePost } from '@/app/actions/posts'
+import CommentSection from './CommentSection'
 
-type Props = { post: Post }
+type Props = { 
+  post: Post
+  currentUserId?: string
+}
 
 function timeAgo(date: string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
@@ -15,10 +19,11 @@ function timeAgo(date: string) {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-export default function PostCard({ post }: Props) {
+export default function PostCard({ post, currentUserId }: Props) {
   const [likeCount, setLikeCount] = useState(post.likes?.length ?? 0)
   const [liked, setLiked] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [showComments, setShowComments] = useState(false)
 
   async function handleLike() {
     if (liked) {
@@ -52,7 +57,7 @@ export default function PostCard({ post }: Props) {
         {creator?.avatar_url ? (
           <Image
             src={creator.avatar_url}
-            alt={creator.name}
+            alt={creator.name || 'avatar'}
             width={40}
             height={40}
             className="post-avatar"
@@ -95,6 +100,17 @@ export default function PostCard({ post }: Props) {
         </button>
 
         <button
+          className="post-action-btn"
+          onClick={() => setShowComments(!showComments)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 11-7.6-14h.1c.1 0 .2 0 .3 0z"/>
+            <path d="M7 11h.01M12 11h.01M17 11h.01"/>
+          </svg>
+          {post.comments?.length || 0}
+        </button>
+
+        <button
           id={`save-btn-${post.id}`}
           className={`post-action-btn ${saved ? 'saved' : ''}`}
           onClick={handleSave}
@@ -124,6 +140,10 @@ export default function PostCard({ post }: Props) {
       )}
 
       <p className="post-time">{timeAgo(post.created_at)}</p>
+
+      {showComments && (
+        <CommentSection postId={post.id} currentUserId={currentUserId} />
+      )}
     </article>
   )
 }

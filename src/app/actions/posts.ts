@@ -93,3 +93,25 @@ export async function createPost(formData: FormData) {
   revalidatePath('/')
   return { success: true }
 }
+
+export async function getPosts(limit: number = 10, offset: number = 0) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *,
+      creator:profiles(*),
+      likes(*),
+      saves(*),
+      comments(*)
+    `)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    return { error: error.message, data: [] }
+  }
+
+  return { data: data || [] }
+}

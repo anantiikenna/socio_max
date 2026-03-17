@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Post } from '@/types'
-import PostCard from '@/components/shared/PostCard'
+import InfiniteFeed from '@/components/shared/InfiniteFeed'
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: posts, error } = await supabase
     .from('posts')
@@ -11,10 +12,11 @@ export default async function HomePage() {
       *,
       creator:profiles(*),
       likes(*),
-      saves(*)
+      saves(*),
+      comments(*)
     `)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(10)
 
   if (error) {
     return (
@@ -37,9 +39,7 @@ export default async function HomePage() {
           <p>Follow people or create your first post to see it here.</p>
         </div>
       ) : (
-        posts.map((post: Post) => (
-          <PostCard key={post.id} post={post} />
-        ))
+        <InfiniteFeed initialPosts={posts as Post[]} currentUserId={user?.id} />
       )}
     </div>
   )

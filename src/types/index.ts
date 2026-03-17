@@ -21,6 +21,7 @@ export type Post = {
   creator?: User
   likes?: Like[]
   saves?: Save[]
+  comments?: Comment[]
 }
 
 export type Like = {
@@ -35,6 +36,15 @@ export type Save = {
   post_id: string
   user_id: string
   created_at: string
+}
+
+export type Comment = {
+  id: string
+  post_id: string
+  user_id: string
+  content: string
+  created_at: string
+  user?: User
 }
 
 export type Follow = {

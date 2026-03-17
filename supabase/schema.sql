@@ -139,6 +139,23 @@ create trigger update_app_settings_updated_at
   before update on public.app_settings
   for each row execute procedure public.update_updated_at_column();
 
+-- COMMENTS
+create table if not exists public.comments (
+  id         uuid primary key default gen_random_uuid(),
+  post_id    uuid not null references public.posts(id) on delete cascade,
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  content    text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.comments enable row level security;
+create policy "Comments are viewable by everyone" on public.comments for select using (true);
+create policy "Authenticated users can comment" on public.comments for insert with check (auth.uid() = user_id);
+create policy "Owners can delete comments" on public.comments for delete using (auth.uid() = user_id);
+
+-- Profile self-update policy (already exists as line 66, but double checking)
+-- create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
+
 -- ============================================================
 -- STORAGE: create buckets for avatars and post images
 -- ============================================================
