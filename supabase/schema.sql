@@ -11,6 +11,7 @@ create table if not exists public.profiles (
   username   text not null unique,
   bio        text,
   avatar_url text,
+  is_admin   boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -20,6 +21,7 @@ create table if not exists public.posts (
   creator_id uuid not null references public.profiles(id) on delete cascade,
   caption    text,
   image_url  text,
+  media_type text not null default 'image', -- 'image' or 'video'
   location   text,
   tags       text[] not null default '{}',
   created_at timestamptz not null default now()
@@ -106,6 +108,36 @@ $$ language plpgsql security definer;
 create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- APP SETTINGS
+create table if not exists public.app_settings (
+  id                    uuid primary key default gen_random_uuid(),
+  allow_video_uploads   boolean not null default true,
+  updated_at            timestamptz not null default now()
+);
+
+-- Initialize settings if empty
+insert into public.app_settings (allow_video_uploads) 
+select true where not exists (select 1 from public.app_settings);
+
+-- RLS for settings: Anyone can read, only admins can update
+alter table public.app_settings enable row level security;
+create policy "Anyone can read settings" on public.app_settings for select using (true);
+create policy "Admins can update settings" on public.app_settings for update 
+  using (exists (select 1 from public.profiles where id = auth.uid() and is_admin = true));
+
+-- TRIGGER: Update updated_at on change
+create or replace function public.update_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger update_app_settings_updated_at
+  before update on public.app_settings
+  for each row execute procedure public.update_updated_at_column();
 
 -- ============================================================
 -- STORAGE: create buckets for avatars and post images

@@ -66,10 +66,19 @@ export default function PostCard({ post }: Props) {
         </div>
       </div>
 
-      {/* Image */}
+      {/* Image or Video */}
       {post.image_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={post.image_url} alt={post.caption ?? 'Post'} className="post-image" />
+        post.media_type === 'video' ? (
+          <video 
+            src={post.image_url} 
+            controls 
+            className="post-image"
+            style={{ backgroundColor: '#000' }}
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={post.image_url} alt={post.caption ?? 'Post'} className="post-image" />
+        )
       )}
 
       {/* Actions */}

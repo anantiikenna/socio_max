@@ -42,6 +42,12 @@ export async function createPost(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  // Check if video uploads are allowed
+  const { data: settings } = await supabase
+    .from('app_settings')
+    .select('allow_video_uploads')
+    .single()
+
   const caption  = formData.get('caption')  as string
   const location = formData.get('location') as string
   const tags     = (formData.get('tags') as string)
@@ -49,12 +55,20 @@ export async function createPost(formData: FormData) {
     .map((t) => t.trim())
     .filter(Boolean)
 
-  const file = formData.get('image') as File | null
+  const file = formData.get('image') as File | null // This could be image or video
   let imageUrl: string | null = null
+  let mediaType: 'image' | 'video' = 'image'
 
   if (file && file.size > 0) {
+    const isVideo = file.type.startsWith('video/')
+    if (isVideo && settings && !settings.allow_video_uploads) {
+      return { error: 'Video uploads are currently disabled by the administrator.' }
+    }
+    
+    mediaType = isVideo ? 'video' : 'image'
     const ext  = file.name.split('.').pop()
     const path = `${user.id}/${Date.now()}.${ext}`
+    
     const { error: uploadError } = await supabase.storage
       .from('posts')
       .upload(path, file, { upsert: false })
@@ -71,6 +85,7 @@ export async function createPost(formData: FormData) {
     location,
     tags,
     image_url: imageUrl,
+    media_type: mediaType,
   })
 
   if (error) return { error: error.message }

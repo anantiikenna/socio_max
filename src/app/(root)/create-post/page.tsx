@@ -9,10 +9,14 @@ export default function CreatePostPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [previewType, setPreviewType] = useState<'image' | 'video' | null>(null)
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) setPreview(URL.createObjectURL(file))
+    if (file) {
+      setPreview(URL.createObjectURL(file))
+      setPreviewType(file.type.startsWith('video/') ? 'video' : 'image')
+    }
   }
 
   async function handleSubmit(formData: FormData) {
@@ -34,12 +38,16 @@ export default function CreatePostPage() {
       <div className="post-card" style={{ padding: '1.5rem' }}>
         <form action={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          {/* Image Upload */}
+          {/* Media Upload */}
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Photo</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Media (Photo or Video)</span>
             {preview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="Preview" className="post-image" style={{ borderRadius: 'var(--radius-sm)' }} />
+              previewType === 'video' ? (
+                <video src={preview} controls className="post-image" style={{ borderRadius: 'var(--radius-sm)' }} />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={preview} alt="Preview" className="post-image" style={{ borderRadius: 'var(--radius-sm)' }} />
+              )
             ) : (
               <div style={{
                 height: 200,
@@ -52,10 +60,10 @@ export default function CreatePostPage() {
                 color: 'var(--text-muted)',
                 fontSize: '0.875rem',
               }}>
-                Click to select image
+                Click to select media
               </div>
             )}
-            <input name="image" type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+            <input name="image" type="file" accept="image/*,video/*" onChange={handleFileChange} style={{ display: 'none' }} />
           </label>
 
           <textarea
