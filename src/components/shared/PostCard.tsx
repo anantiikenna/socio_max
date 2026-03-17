@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
-import type { Post } from '@/types'
+import type { Post, Profile } from '@/types'
 import { likePost, unlikePost, savePost, unsavePost } from '@/app/actions/posts'
 import CommentSection from './CommentSection'
 
@@ -21,8 +22,10 @@ function timeAgo(date: string) {
 
 export default function PostCard({ post, currentUserId }: Props) {
   const [likeCount, setLikeCount] = useState(post.likes?.length ?? 0)
-  const [liked, setLiked] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const isLiked = post.likes?.some(l => l.user_id === currentUserId)
+  const isSaved = post.saves?.some(s => s.user_id === currentUserId)
+  const [liked, setLiked] = useState(isLiked)
+  const [saved, setSaved] = useState(isSaved)
   const [showComments, setShowComments] = useState(false)
 
   async function handleLike() {
@@ -47,28 +50,24 @@ export default function PostCard({ post, currentUserId }: Props) {
     }
   }
 
-  const creator = post.creator
+  const creator = post.creator as Profile
   const initials = creator?.name?.[0]?.toUpperCase() ?? '?'
 
   return (
     <article className="post-card">
       {/* Header */}
       <div className="post-card-header">
-        {creator?.avatar_url ? (
-          <Image
-            src={creator.avatar_url}
-            alt={creator.name || 'avatar'}
-            width={40}
-            height={40}
-            className="post-avatar"
-          />
-        ) : (
-          <div className="post-avatar-placeholder">{initials}</div>
-        )}
-        <div className="post-meta">
-          <p className="post-creator">{creator?.name ?? 'Unknown'}</p>
-          {post.location && <p className="post-location">{post.location}</p>}
-        </div>
+        <Link href={`/profile/${creator?.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: 'inherit' }}>
+          {creator?.avatar_url ? (
+            <Image src={creator.avatar_url} alt={creator.name || 'avatar'} width={40} height={40} className="avatar shadow-sm" />
+          ) : (
+            <div className="avatar-placeholder">{initials}</div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className="font-bold text-sm">{creator?.name ?? 'Unknown'}</span>
+            {post.location && <span className="text-xs text-muted">{post.location}</span>}
+          </div>
+        </Link>
       </div>
 
       {/* Image or Video */}

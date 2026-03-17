@@ -1,4 +1,4 @@
-export type User = {
+export type Profile = {
   id: string
   email: string
   name: string
@@ -18,7 +18,7 @@ export type Post = {
   location: string | null
   tags: string[]
   created_at: string
-  creator?: User
+  creator?: Profile
   likes?: Like[]
   saves?: Save[]
   comments?: Comment[]
@@ -44,7 +44,7 @@ export type Comment = {
   user_id: string
   content: string
   created_at: string
-  user?: User
+  user?: Profile
 }
 
 export type Follow = {

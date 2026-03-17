@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import type { Comment } from '@/types'
 import { addComment, getComments, deleteComment } from '@/app/actions/comments'
 
@@ -63,16 +64,20 @@ export default function CommentSection({ postId, currentUserId }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
           {comments.map((comment) => (
             <div key={comment.id} style={{ display: 'flex', gap: '0.75rem' }}>
-              {comment.user?.avatar_url ? (
-                <Image src={comment.user.avatar_url} alt={comment.user.name} width={24} height={24} style={{ borderRadius: '50%', flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyItems: 'center', fontSize: '0.6rem', color: '#fff', flexShrink: 0, justifyContent: 'center' }}>
-                  {comment.user?.name?.[0]?.toUpperCase() || '?'}
-                </div>
-              )}
+              <Link href={`/profile/${comment.user_id}`} style={{ flexShrink: 0 }}>
+                {comment.user?.avatar_url ? (
+                  <Image src={comment.user.avatar_url} alt={comment.user.name} width={24} height={24} style={{ borderRadius: '50%' }} />
+                ) : (
+                  <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff' }}>
+                    {comment.user?.name?.[0]?.toUpperCase() || '?'}
+                  </div>
+                )}
+              </Link>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '0.8rem' }}>
-                  <strong style={{ marginRight: '0.4rem' }}>{comment.user?.username || comment.user?.name}</strong>
+                  <Link href={`/profile/${comment.user_id}`} style={{ textDecoration: 'none', color: 'inherit', fontWeight: 700, marginRight: '0.4rem' }}>
+                    {comment.user?.username || comment.user?.name}
+                  </Link>
                   {comment.content}
                 </p>
                 {currentUserId === comment.user_id && (
