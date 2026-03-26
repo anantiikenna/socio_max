@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Comment } from '@/types'
 import { addComment, getComments, deleteComment } from '@/app/actions/comments'
 
@@ -12,44 +13,52 @@ type Props = {
 }
 
 export default function CommentSection({ postId, currentUserId }: Props) {
-  const [comments, setComments] = useState<Comment[]>([])
+  const queryClient = useQueryClient()
   const [content, setContent] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [fetching, setFetching] = useState(true)
 
-  useEffect(() => {
-    async function loadComments() {
+  // Query for comments
+  const { data: comments = [], isLoading: fetching } = useQuery({
+    queryKey: ['comments', postId],
+    queryFn: async () => {
       const res = await getComments(postId)
-      if (res.data) setComments(res.data)
-      setFetching(false)
-    }
-    loadComments()
-  }, [postId])
+      return res.data || []
+    },
+  })
+
+  // Mutation for adding a comment
+  const addMutation = useMutation({
+    mutationFn: (text: string) => addComment(postId, text),
+    onSuccess: (res) => {
+      if (res.success) {
+        setContent('')
+        queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      } else {
+        alert(res.error || 'Failed to post comment')
+      }
+    },
+  })
+
+  // Mutation for deleting a comment
+  const deleteMutation = useMutation({
+    mutationFn: (commentId: string) => deleteComment(commentId),
+    onSuccess: (res) => {
+      if (res.success) {
+        queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      } else {
+        alert(res.error || 'Failed to delete comment')
+      }
+    },
+  })
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!content.trim() || loading) return
-
-    setLoading(true)
-    const res = await addComment(postId, content)
-    
-    if (res.success) {
-      setContent('')
-      // Reload comments
-      const updated = await getComments(postId)
-      if (updated.data) setComments(updated.data)
-    } else {
-      alert(res.error || 'Failed to post comment')
-    }
-    setLoading(false)
+    if (!content.trim() || addMutation.isPending) return
+    addMutation.mutate(content)
   }
 
   async function handleDelete(commentId: string) {
     if (!confirm('Are you sure?')) return
-    const res = await deleteComment(commentId)
-    if (res.success) {
-      setComments(comments.filter(c => c.id !== commentId))
-    }
+    deleteMutation.mutate(commentId)
   }
 
   return (
@@ -66,7 +75,7 @@ export default function CommentSection({ postId, currentUserId }: Props) {
             <div key={comment.id} style={{ display: 'flex', gap: '0.75rem' }}>
               <Link href={`/profile/${comment.user_id}`} style={{ flexShrink: 0 }}>
                 {comment.user?.avatar_url ? (
-                  <Image src={comment.user.avatar_url} alt={comment.user.name} width={24} height={24} style={{ borderRadius: '50%' }} />
+                   <Image src={comment.user.avatar_url} alt={comment.user.name || 'User'} width={24} height={24} style={{ borderRadius: '50%' }} />
                 ) : (
                   <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff' }}>
                     {comment.user?.name?.[0]?.toUpperCase() || '?'}
@@ -76,14 +85,15 @@ export default function CommentSection({ postId, currentUserId }: Props) {
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '0.8rem' }}>
                   <Link href={`/profile/${comment.user_id}`} style={{ textDecoration: 'none', color: 'inherit', fontWeight: 700, marginRight: '0.4rem' }}>
-                    {comment.user?.username || comment.user?.name}
+                     {comment.user?.username || comment.user?.name}
                   </Link>
                   {comment.content}
                 </p>
                 {currentUserId === comment.user_id && (
                   <button 
                     onClick={() => handleDelete(comment.id)} 
-                    style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.7rem', cursor: 'pointer', padding: 0, marginTop: '2px' }}
+                    disabled={deleteMutation.isPending}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.7rem', cursor: 'pointer', padding: 0, marginTop: '2px', opacity: deleteMutation.isPending ? 0.5 : 1 }}
                   >
                     Delete
                   </button>
@@ -103,8 +113,8 @@ export default function CommentSection({ postId, currentUserId }: Props) {
           className="auth-input"
           style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
         />
-        <button type="submit" className="auth-btn" disabled={loading} style={{ width: 'auto', padding: '0 1rem', fontSize: '0.85rem' }}>
-          Post
+        <button type="submit" className="auth-btn" disabled={addMutation.isPending} style={{ width: 'auto', padding: '0 1rem', fontSize: '0.85rem' }}>
+          {addMutation.isPending ? 'Posting...' : 'Post'}
         </button>
       </form>
     </div>

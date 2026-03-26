@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import QueryProvider from '@/components/providers/QueryProvider'
 
 export const metadata: Metadata = {
   title: 'Socio Max',
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
+      </body>
     </html>
   )
 }
