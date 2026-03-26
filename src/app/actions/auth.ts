@@ -43,8 +43,7 @@ export async function signUp(formData: FormData) {
     return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  return { success: true }
 }
 
 export async function signOut() {

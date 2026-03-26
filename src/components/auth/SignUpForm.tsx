@@ -7,6 +7,8 @@ export default function SignUpForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const [success, setSuccess] = useState(false)
+
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
@@ -14,7 +16,27 @@ export default function SignUpForm() {
     if (result?.error) {
       setError(result.error)
       setLoading(false)
+    } else if (result?.success) {
+      setSuccess(true)
+      setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="auth-success-message">
+        <div className="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h2>Verification Link Sent!</h2>
+        <p>We&apos;ve sent a confirmation link to your email address. Please click it to activate your account and start using Socio Max.</p>
+        <div className="auth-switch" style={{ marginTop: '1.5rem' }}>
+          <a href="/sign-in">Back to Login</a>
+        </div>
+      </div>
+    )
   }
 
   return (
