@@ -28,25 +28,52 @@ export default function CommentSection({ postId, currentUserId }: Props) {
   // Mutation for adding a comment
   const addMutation = useMutation({
     mutationFn: (text: string) => addComment(postId, text),
-    onSuccess: (res) => {
-      if (res.success) {
-        setContent('')
-        queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      } else {
-        alert(res.error || 'Failed to post comment')
-      }
+    onMutate: async (newText) => {
+      await queryClient.cancelQueries({ queryKey: ['comments', postId] })
+      const previousComments = queryClient.getQueryData(['comments', postId])
+
+      // Optimistic update
+      queryClient.setQueryData(['comments', postId], (old: any) => [
+        ...(old || []),
+        {
+          id: 'temp-' + Date.now(),
+          content: newText,
+          post_id: postId,
+          user_id: currentUserId,
+          created_at: new Date().toISOString(),
+          user: { id: currentUserId, username: 'You', name: 'You', avatar_url: null }
+        }
+      ])
+
+      return { previousComments }
+    },
+    onError: (err, newText, context) => {
+      queryClient.setQueryData(['comments', postId], context?.previousComments)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      setContent('')
     },
   })
 
   // Mutation for deleting a comment
   const deleteMutation = useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
-    onSuccess: (res) => {
-      if (res.success) {
-        queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      } else {
-        alert(res.error || 'Failed to delete comment')
-      }
+    onMutate: async (commentId) => {
+      await queryClient.cancelQueries({ queryKey: ['comments', postId] })
+      const previousComments = queryClient.getQueryData(['comments', postId])
+
+      queryClient.setQueryData(['comments', postId], (old: any) => 
+        old?.filter((c: any) => c.id !== commentId)
+      )
+
+      return { previousComments }
+    },
+    onError: (err, commentId, context) => {
+      queryClient.setQueryData(['comments', postId], context?.previousComments)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
     },
   })
 
@@ -65,14 +92,14 @@ export default function CommentSection({ postId, currentUserId }: Props) {
     <div className="comment-section" style={{ padding: '0 1rem 1rem', borderTop: '1px solid var(--border)', marginTop: '0.5rem' }}>
       <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.75rem 0' }}>Comments</p>
       
-      {fetching ? (
+      {fetching && comments.length === 0 ? (
         <div className="skeleton" style={{ height: 40, marginBottom: '0.5rem' }}></div>
       ) : comments.length === 0 ? (
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>No comments yet.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
           {comments.map((comment) => (
-            <div key={comment.id} style={{ display: 'flex', gap: '0.75rem' }}>
+            <div key={comment.id} style={{ display: 'flex', gap: '0.75rem', opacity: comment.id.toString().startsWith('temp-') ? 0.6 : 1 }}>
               <Link href={`/profile/${comment.user_id}`} style={{ flexShrink: 0 }}>
                 {comment.user?.avatar_url ? (
                    <Image src={comment.user.avatar_url} alt={comment.user.name || 'User'} width={24} height={24} style={{ borderRadius: '50%' }} />
@@ -89,7 +116,7 @@ export default function CommentSection({ postId, currentUserId }: Props) {
                   </Link>
                   {comment.content}
                 </p>
-                {currentUserId === comment.user_id && (
+                {currentUserId === comment.user_id && !comment.id.toString().startsWith('temp-') && (
                   <button 
                     onClick={() => handleDelete(comment.id)} 
                     disabled={deleteMutation.isPending}
@@ -120,3 +147,4 @@ export default function CommentSection({ postId, currentUserId }: Props) {
     </div>
   )
 }
+
